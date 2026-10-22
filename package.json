@@ -1,0 +1,41 @@
+{
+  "name": "ts-complexity-mcp",
+  "version": "0.1.0",
+  "description": "MCP server (stdio) that scores the complexity of a TypeScript function using tsmetrics-core.",
+  "license": "MIT",
+  "type": "module",
+  "os": [
+    "linux",
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "ts-complexity-mcp": "dist/server.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "pretest": "npm run build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "tsmetrics-core": "^1.4.1",
+    "typescript": "^5.9.3",
+    "zod": "^4.6.7"
+  },
+  "overrides": {
+    "tsmetrics-core": {
+      "typescript": "$typescript"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "vitest": "^5.0.5"
+  }
+}
