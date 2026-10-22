@@ -25,7 +25,7 @@ export function getCodeComplexity(
     try {
         const temporaryFileName: string = getUniqueFileName();
         const sourceFile: ts.SourceFile = ts.createSourceFile(temporaryFileName, code, TARGET_LANGUAGE_VERSION, true);
-        const error: string = findError(code, sourceFile);
+        const error: string = getErrorText(code, sourceFile);
 
         if (error !== "") {
             return ComplexityResult.failure(error);
@@ -33,7 +33,7 @@ export function getCodeComplexity(
 
         const root: IMetricsModel = MetricsParser.getMetricsFromText(temporaryFileName, code, MetricsConfiguration, TARGET_LANGUAGE_VERSION).metrics;
 
-        return ComplexityResult.success(root.getCollectedComplexity(), collectDetails(root, sourceFile));
+        return ComplexityResult.success(root.getCollectedComplexity(), getCollectedDetails(root, sourceFile));
     } catch (thrown: unknown) {
         const reason: string = thrown instanceof Error ? thrown.message : String(thrown);
 
@@ -42,7 +42,7 @@ export function getCodeComplexity(
 }
 
 // Returns "" when the snippet is a syntactically valid single function.
-function findError(
+function getErrorText(
     code: string,
     sourceFile: ts.SourceFile
 ): string {
@@ -81,7 +81,7 @@ function isSingleFunction(
     return ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer);
 }
 
-function collectDetails(
+function getCollectedDetails(
     model: IMetricsModel,
     sourceFile: ts.SourceFile
 ): ComplexityDetail[] {
@@ -97,7 +97,7 @@ function collectDetails(
             ]
             : [];
 
-    return own.concat(model.children.flatMap((child: IMetricsModel): ComplexityDetail[] => collectDetails(child, sourceFile)));
+    return own.concat(model.children.flatMap((child: IMetricsModel): ComplexityDetail[] => getCollectedDetails(child, sourceFile)));
 }
 
 function getUniqueFileName(): string {
