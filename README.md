@@ -6,7 +6,9 @@ Use this server to prevent code that is too complex.
 
 This server is an MCP interface for the tsmetrics-core package by Tamas Kiss: <https://github.com/kisstkondoros/tsmetrics-core>.
 
-Tell your junior developers to install this server. In your rules, set the maximum complexity to 12.
+Adding a rule in your AGENTS.md file to limit complexity to 12 or lower. Ask your LLM to reduce complexity.
+
+![alt text](mcp_in_action.png)
 
 ## Installation
 
