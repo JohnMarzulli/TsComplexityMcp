@@ -23,22 +23,32 @@ export function getCodeComplexity(
     code: string
 ): ComplexityResult {
     try {
-        const temporaryFileName: string = getUniqueFileName();
-        const sourceFile: ts.SourceFile = ts.createSourceFile(temporaryFileName, code, TARGET_LANGUAGE_VERSION, true);
-        const error: string = getErrorText(code, sourceFile);
-
-        if (error !== "") {
-            return ComplexityResult.failure(error);
-        }
-
-        const root: IMetricsModel = MetricsParser.getMetricsFromText(temporaryFileName, code, MetricsConfiguration, TARGET_LANGUAGE_VERSION).metrics;
-
-        return ComplexityResult.success(root.getCollectedComplexity(), getCollectedDetails(root, sourceFile));
+        return calculateCodeComplexity(code);
     } catch (thrown: unknown) {
-        const reason: string = thrown instanceof Error ? thrown.message : String(thrown);
-
-        return ComplexityResult.failure(`Complexity could not be calculated: ${reason}`);
+        return ComplexityResult.failure(`Complexity could not be calculated: ${getThrownMessage(thrown)}`);
     }
+}
+
+function calculateCodeComplexity(
+    code: string
+): ComplexityResult {
+    const temporaryFileName: string = getUniqueFileName();
+    const sourceFile: ts.SourceFile = ts.createSourceFile(temporaryFileName, code, TARGET_LANGUAGE_VERSION, true);
+    const error: string = getErrorText(code, sourceFile);
+
+    if (error !== "") {
+        return ComplexityResult.failure(error);
+    }
+
+    const root: IMetricsModel = MetricsParser.getMetricsFromText(temporaryFileName, code, MetricsConfiguration, TARGET_LANGUAGE_VERSION).metrics;
+
+    return ComplexityResult.success(root.getCollectedComplexity(), getCollectedDetails(root, sourceFile));
+}
+
+function getThrownMessage(
+    thrown: unknown
+): string {
+    return thrown instanceof Error ? thrown.message : String(thrown);
 }
 
 // Returns "" when the snippet is a syntactically valid single function.
@@ -60,17 +70,20 @@ function getErrorText(
 function isSingleFunction(
     sourceFile: ts.SourceFile
 ): boolean {
-    if (sourceFile.statements.length !== 1) {
-        return false;
-    }
+    return sourceFile.statements.length === 1 && isFunctionStatement(sourceFile.statements[0]);
+}
 
-    const statement: ts.Statement = sourceFile.statements[0];
+function isFunctionStatement(
+    statement: ts.Statement
+): boolean {
+    return ts.isFunctionDeclaration(statement)
+        || (ts.isVariableStatement(statement) && isFunctionVariableStatement(statement));
+}
 
-    if (ts.isFunctionDeclaration(statement)) {
-        return true;
-    }
-
-    if (!ts.isVariableStatement(statement) || statement.declarationList.declarations.length !== 1) {
+function isFunctionVariableStatement(
+    statement: ts.VariableStatement
+): boolean {
+    if (statement.declarationList.declarations.length !== 1) {
         return false;
     }
 
@@ -78,6 +91,12 @@ function isSingleFunction(
     // Falls back to the declaration itself, which fails both checks below.
     const initializer: ts.Node = declaration.initializer ?? declaration;
 
+    return isFunctionInitializer(initializer);
+}
+
+function isFunctionInitializer(
+    initializer: ts.Node
+): boolean {
     return ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer);
 }
 
