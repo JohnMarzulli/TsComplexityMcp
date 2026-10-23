@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { InvalidFixture, invalidFixtures, ValidFixture, validFixtures } from "./fixtures.js";
 
 const SERVER_PATH: string = fileURLToPath(new URL("../dist/server.js", import.meta.url));
-const TOOL_NAME: string = "analyze_complexity";
+const TOOL_NAME: string = "analyze_typescript_complexity";
 
 interface ToolReply {
     readonly isError: boolean;

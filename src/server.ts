@@ -9,7 +9,7 @@ import { getCodeComplexity } from "./complexity.js";
 const server: McpServer = new McpServer({ name: "ts-complexity-mcp", version: "0.1.0" });
 
 server.registerTool(
-    "analyze_complexity",
+    "analyze_typescript_complexity",
     {
         description:
             "Scores the complexity of a single TypeScript function with tsmetrics-core. Returns JSON " +
